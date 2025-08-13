@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tradebitco-api
+  labels:
+    app: tradebitco-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: tradebitco-api
+  template:
+    metadata:
+      labels:
+        app: tradebitco-api
+    spec:
+      containers:
+      - name: api
+        image: tradebitco/api:latest
+        ports:
+        - containerPort: 5000
+        - containerPort: 8080
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: tradebitco-secrets
+              key: database-url
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: tradebitco-secrets
+              key: jwt-secret
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: tradebitco-secrets
+              key: redis-url
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tradebitco-api-service
+spec:
+  selector:
+    app: tradebitco-api
+  ports:
+  - name: http
+    port: 80
+    targetPort: 5000
+  - name: websocket
+    port: 8080
+    targetPort: 8080
+  type: LoadBalancer
