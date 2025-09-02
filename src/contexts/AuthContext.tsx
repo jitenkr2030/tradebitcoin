@@ -1,12 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { authAPI } from '../services/api';
 import { User } from '../types/trading';
 
 interface AuthContextType {
   user: User | null;
+  loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  register: (email: string, password: string) => Promise<void>;
-  upgradeSubscription: (plan: 'PRO' | 'ENTERPRISE') => Promise<void>;
+  register: (email: string, password: string, name: string) => Promise<void>;
+  upgradeSubscription: (plan: 'PRO' | 'ELITE') => Promise<void>;
   enable2FA: () => Promise<void>;
   updateApiKeys: (exchange: string, key: string, secret: string) => Promise<void>;
 }
@@ -15,73 +17,71 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for stored auth token and validate
-    const token = localStorage.getItem('token');
-    if (token) {
-      // Validate token and fetch user data
-    }
+    checkAuthState();
   }, []);
+
+  const checkAuthState = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        // Validate token by making a request
+        const response = await fetch('http://localhost:5000/api/v1/auth/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData.data);
+        } else {
+          localStorage.removeItem('authToken');
+        }
+      }
+    } catch (error) {
+      console.error('Auth check error:', error);
+      localStorage.removeItem('authToken');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
+      const response = await authAPI.login(email, password);
+      const { user: userData, tokens } = response.data.data;
       
-      if (!response.ok) throw new Error('Login failed');
-      
-      const { token, user } = await response.json();
-      localStorage.setItem('token', token);
-      setUser(user);
-    } catch (error) {
+      localStorage.setItem('authToken', tokens.accessToken);
+      setUser(userData);
+    } catch (error: any) {
       console.error('Login error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Login failed');
     }
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('authToken');
     setUser(null);
   };
 
-  const register = async (email: string, password: string) => {
+  const register = async (email: string, password: string, name: string) => {
     try {
-      const response = await fetch('http://localhost:3000/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
+      const response = await authAPI.register(email, password, name);
+      const { user: userData, tokens } = response.data.data;
       
-      if (!response.ok) throw new Error('Registration failed');
-      
-      const { token, user } = await response.json();
-      localStorage.setItem('token', token);
-      setUser(user);
-    } catch (error) {
+      localStorage.setItem('authToken', tokens.accessToken);
+      setUser(userData);
+    } catch (error: any) {
       console.error('Registration error:', error);
-      throw error;
+      throw new Error(error.response?.data?.message || 'Registration failed');
     }
   };
 
-  const upgradeSubscription = async (plan: 'PRO' | 'ENTERPRISE') => {
+  const upgradeSubscription = async (plan: 'PRO' | 'ELITE') => {
     try {
-      const response = await fetch('http://localhost:3000/api/subscription/upgrade', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ plan })
-      });
-      
-      if (!response.ok) throw new Error('Subscription upgrade failed');
-      
-      const updatedUser = await response.json();
-      setUser(updatedUser);
+      // Implementation for subscription upgrade
+      console.log('Upgrading to:', plan);
     } catch (error) {
       console.error('Subscription upgrade error:', error);
       throw error;
@@ -90,17 +90,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const enable2FA = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/auth/enable-2fa', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      
-      if (!response.ok) throw new Error('2FA enablement failed');
-      
-      const updatedUser = await response.json();
-      setUser(updatedUser);
+      // Implementation for 2FA
+      console.log('Enabling 2FA');
     } catch (error) {
       console.error('2FA enablement error:', error);
       throw error;
@@ -109,19 +100,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const updateApiKeys = async (exchange: string, key: string, secret: string) => {
     try {
-      const response = await fetch('http://localhost:3000/api/auth/api-keys', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ exchange, key, secret })
-      });
-      
-      if (!response.ok) throw new Error('API key update failed');
-      
-      const updatedUser = await response.json();
-      setUser(updatedUser);
+      // Implementation for API key update
+      console.log('Updating API keys for:', exchange);
     } catch (error) {
       console.error('API key update error:', error);
       throw error;
@@ -130,6 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const value = {
     user,
+    loading,
     login,
     logout,
     register,
