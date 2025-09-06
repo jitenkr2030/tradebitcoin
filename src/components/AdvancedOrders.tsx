@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowUpDown, Clock, Layers, Target } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ArrowUpDown, Clock, Layers, Target, AlertTriangle } from 'lucide-react';
 
 interface AdvancedOrdersProps {
   currentPrice: number;
@@ -18,9 +17,11 @@ function AdvancedOrders({ currentPrice, symbol }: AdvancedOrdersProps) {
     intervalMinutes: '5',
     visibleAmount: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     
     try {
       let endpoint = '';
@@ -67,7 +68,6 @@ function AdvancedOrders({ currentPrice, symbol }: AdvancedOrdersProps) {
       });
 
       if (response.ok) {
-        // Reset form
         setFormData({
           amount: '',
           limitPrice: '',
@@ -80,13 +80,15 @@ function AdvancedOrders({ currentPrice, symbol }: AdvancedOrdersProps) {
       }
     } catch (error) {
       console.error('Error creating advanced order:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const orderTypes = [
-    { type: 'OCO', icon: ArrowUpDown, label: 'One-Cancels-Other' },
-    { type: 'TWAP', icon: Clock, label: 'Time-Weighted Avg' },
-    { type: 'ICEBERG', icon: Layers, label: 'Iceberg Order' }
+    { type: 'OCO', icon: ArrowUpDown, label: 'One-Cancels-Other', description: 'Place limit and stop orders simultaneously' },
+    { type: 'TWAP', icon: Clock, label: 'Time-Weighted Avg', description: 'Split large orders over time' },
+    { type: 'ICEBERG', icon: Layers, label: 'Iceberg Order', description: 'Hide order size from market' }
   ];
 
   return (
@@ -97,19 +99,22 @@ function AdvancedOrders({ currentPrice, symbol }: AdvancedOrdersProps) {
       </div>
 
       {/* Order Type Selector */}
-      <div className="flex space-x-2 mb-6">
-        {orderTypes.map(({ type, icon: Icon, label }) => (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        {orderTypes.map(({ type, icon: Icon, label, description }) => (
           <button
             key={type}
             onClick={() => setOrderType(type as any)}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
+            className={`p-4 rounded-lg border transition-all ${
               orderType === type
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                ? 'bg-blue-600/20 border-blue-500 text-blue-400'
+                : 'bg-gray-700 border-gray-600 text-gray-400 hover:border-gray-500'
             }`}
           >
-            <Icon className="w-4 h-4" />
-            <span className="text-sm">{label}</span>
+            <div className="flex flex-col items-center space-y-2">
+              <Icon className="w-6 h-6" />
+              <span className="font-semibold">{label}</span>
+              <span className="text-xs text-center">{description}</span>
+            </div>
           </button>
         ))}
       </div>
@@ -132,11 +137,7 @@ function AdvancedOrders({ currentPrice, symbol }: AdvancedOrdersProps) {
 
         {/* OCO Specific Fields */}
         {orderType === 'OCO' && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            className="space-y-4"
-          >
+          <div className="space-y-4 p-4 bg-gray-700/50 rounded-lg">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-gray-400 mb-2">Limit Price</label>
@@ -175,16 +176,12 @@ function AdvancedOrders({ currentPrice, symbol }: AdvancedOrdersProps) {
                 required
               />
             </div>
-          </motion.div>
+          </div>
         )}
 
         {/* TWAP Specific Fields */}
         {orderType === 'TWAP' && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            className="space-y-4"
-          >
+          <div className="space-y-4 p-4 bg-gray-700/50 rounded-lg">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-gray-400 mb-2">Duration (minutes)</label>
@@ -216,16 +213,12 @@ function AdvancedOrders({ currentPrice, symbol }: AdvancedOrdersProps) {
                 </select>
               </div>
             </div>
-          </motion.div>
+          </div>
         )}
 
         {/* Iceberg Specific Fields */}
         {orderType === 'ICEBERG' && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            className="space-y-4"
-          >
+          <div className="space-y-4 p-4 bg-gray-700/50 rounded-lg">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-gray-400 mb-2">Visible Amount</label>
@@ -252,20 +245,25 @@ function AdvancedOrders({ currentPrice, symbol }: AdvancedOrdersProps) {
                 />
               </div>
             </div>
-          </motion.div>
+          </div>
         )}
 
         <button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 px-4 py-3 rounded-lg font-semibold transition-colors"
+          disabled={isSubmitting}
+          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 px-4 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2"
         >
-          Create {orderType} Order
+          <Target className="w-5 h-5" />
+          <span>{isSubmitting ? 'Creating...' : `Create ${orderType} Order`}</span>
         </button>
       </form>
 
       {/* Order Type Explanations */}
       <div className="mt-6 p-4 bg-gray-700/50 rounded-lg">
-        <h3 className="font-semibold mb-2">Order Type Explanation:</h3>
+        <div className="flex items-center space-x-2 mb-2">
+          <AlertTriangle className="w-5 h-5 text-yellow-400" />
+          <h3 className="font-semibold">Order Type Explanation:</h3>
+        </div>
         {orderType === 'OCO' && (
           <p className="text-sm text-gray-400">
             OCO orders place both a limit order and a stop-limit order simultaneously. 

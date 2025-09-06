@@ -15,6 +15,10 @@ import AIAdvisor from './components/AIAdvisor';
 import TaxAssistant from './components/TaxAssistant';
 import DeFiDashboard from './components/DeFiDashboard';
 import EducationCenter from './components/EducationCenter';
+import CopyTrading from './components/CopyTrading';
+import AdvancedOrders from './components/AdvancedOrders';
+import RiskManagement from './components/RiskManagement';
+import EnhancedAI from './components/EnhancedAI';
 import PrivateRoute from './components/PrivateRoute';
 
 function App() {
@@ -67,6 +71,30 @@ function App() {
                 <div className="min-h-screen bg-gray-900 text-white">
                   <Navbar />
                   <PrivateRoute><EducationCenter /></PrivateRoute>
+                </div>
+              } />
+              <Route path="/copy-trading" element={
+                <div className="min-h-screen bg-gray-900 text-white">
+                  <Navbar />
+                  <PrivateRoute><CopyTrading /></PrivateRoute>
+                </div>
+              } />
+              <Route path="/advanced-orders" element={
+                <div className="min-h-screen bg-gray-900 text-white">
+                  <Navbar />
+                  <PrivateRoute><AdvancedOrders currentPrice={67523} symbol="BTC/USDT" /></PrivateRoute>
+                </div>
+              } />
+              <Route path="/risk-management" element={
+                <div className="min-h-screen bg-gray-900 text-white">
+                  <Navbar />
+                  <PrivateRoute><RiskManagement /></PrivateRoute>
+                </div>
+              } />
+              <Route path="/enhanced-ai" element={
+                <div className="min-h-screen bg-gray-900 text-white">
+                  <Navbar />
+                  <PrivateRoute><EnhancedAI /></PrivateRoute>
                 </div>
               } />
               <Route path="/settings" element={

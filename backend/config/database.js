@@ -134,6 +134,85 @@ const initializeDatabase = () => {
       )
     `);
 
+    // Copy trading tables
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS copy_traders (
+        id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+        total_followers INTEGER DEFAULT 0,
+        total_profit REAL DEFAULT 0,
+        win_rate REAL DEFAULT 0,
+        max_drawdown REAL DEFAULT 0,
+        sharpe_ratio REAL DEFAULT 0,
+        total_trades INTEGER DEFAULT 0,
+        avg_monthly_return REAL DEFAULT 0,
+        risk_score REAL DEFAULT 0,
+        verified_trader BOOLEAN DEFAULT FALSE,
+        subscription_fee REAL DEFAULT 0,
+        performance_fee REAL DEFAULT 0,
+        description TEXT,
+        trading_experience INTEGER,
+        accepting_followers BOOLEAN DEFAULT TRUE,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS copy_trading_follows (
+        id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+        follower_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+        trader_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+        allocation_percent REAL NOT NULL,
+        max_risk_percent REAL NOT NULL,
+        stop_loss REAL,
+        status TEXT DEFAULT 'ACTIVE',
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Advanced orders table
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS advanced_orders (
+        id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+        type TEXT NOT NULL,
+        symbol TEXT NOT NULL,
+        amount REAL NOT NULL,
+        price REAL,
+        status TEXT DEFAULT 'PENDING',
+        order_group_id TEXT,
+        parent_order_id TEXT,
+        parameters TEXT DEFAULT '{}',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Risk management tables
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS risk_limits (
+        user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        max_daily_loss REAL DEFAULT 5,
+        max_position_size REAL DEFAULT 20,
+        max_drawdown REAL DEFAULT 10,
+        stop_loss_percent REAL DEFAULT 2,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS risk_events (
+        id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+        type TEXT NOT NULL,
+        description TEXT,
+        severity TEXT DEFAULT 'MEDIUM',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     logger.info('Database initialized successfully');
   } catch (error) {
     logger.error('Database initialization error:', error);

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, AlertTriangle, Target, Activity, Zap } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Shield, AlertTriangle, Target, Activity, Zap, TrendingDown } from 'lucide-react';
 
 interface RiskMetrics {
   riskScore: number;
@@ -33,6 +32,7 @@ function RiskManagement() {
     stopLossPercent: 2
   });
   const [emergencyMode, setEmergencyMode] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchRiskAssessment();
@@ -47,6 +47,8 @@ function RiskManagement() {
       setRiskMetrics(data.data);
     } catch (error) {
       console.error('Error fetching risk assessment:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -103,13 +105,24 @@ function RiskManagement() {
     }
   };
 
-  if (!riskMetrics) {
+  if (loading) {
     return (
       <div className="bg-gray-800 rounded-lg p-6">
         <div className="animate-pulse space-y-4">
           <div className="h-4 bg-gray-700 rounded w-1/4"></div>
           <div className="h-8 bg-gray-700 rounded w-1/2"></div>
           <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!riskMetrics) {
+    return (
+      <div className="bg-gray-800 rounded-lg p-6">
+        <div className="text-center text-gray-400">
+          <AlertTriangle className="w-12 h-12 mx-auto mb-4" />
+          <p>Unable to load risk assessment</p>
         </div>
       </div>
     );
@@ -136,7 +149,7 @@ function RiskManagement() {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Risk Score */}
           <div className={`rounded-lg p-4 border ${getRiskBgColor(riskMetrics.riskLevel)}`}>
             <div className="flex items-center justify-between mb-2">
@@ -174,7 +187,7 @@ function RiskManagement() {
           <div className="bg-gray-700 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-semibold">Max Drawdown</h3>
-              <AlertTriangle className="w-5 h-5 text-red-400" />
+              <TrendingDown className="w-5 h-5 text-red-400" />
             </div>
             <div className="text-2xl font-bold mb-2 text-red-400">
               {riskMetrics.metrics.maxDrawdown.toFixed(2)}%
@@ -183,28 +196,20 @@ function RiskManagement() {
               Limit: {riskLimits.maxDrawdown}%
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Risk Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-gray-800 rounded-lg p-4">
-          <h3 className="text-gray-400 text-sm mb-2">Win Rate</h3>
-          <div className="text-xl font-bold">{riskMetrics.metrics.winRate.toFixed(1)}%</div>
-        </div>
-        <div className="bg-gray-800 rounded-lg p-4">
-          <h3 className="text-gray-400 text-sm mb-2">Sharpe Ratio</h3>
-          <div className="text-xl font-bold">{riskMetrics.metrics.sharpeRatio.toFixed(2)}</div>
-        </div>
-        <div className="bg-gray-800 rounded-lg p-4">
-          <h3 className="text-gray-400 text-sm mb-2">VaR (95%)</h3>
-          <div className="text-xl font-bold text-red-400">
-            ${riskMetrics.metrics.var95.toLocaleString()}
+          {/* Win Rate */}
+          <div className="bg-gray-700 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-semibold">Win Rate</h3>
+              <Zap className="w-5 h-5 text-green-400" />
+            </div>
+            <div className="text-2xl font-bold mb-2 text-green-400">
+              {riskMetrics.metrics.winRate.toFixed(1)}%
+            </div>
+            <div className="text-sm text-gray-400">
+              Last 30 days
+            </div>
           </div>
-        </div>
-        <div className="bg-gray-800 rounded-lg p-4">
-          <h3 className="text-gray-400 text-sm mb-2">Volatility</h3>
-          <div className="text-xl font-bold">{(riskMetrics.metrics.volatility * 100).toFixed(1)}%</div>
         </div>
       </div>
 
@@ -229,6 +234,10 @@ function RiskManagement() {
                 }))}
                 className="w-full"
               />
+              <div className="flex justify-between text-sm text-gray-400">
+                <span>1%</span>
+                <span>20%</span>
+              </div>
             </div>
             
             <div>
@@ -246,6 +255,10 @@ function RiskManagement() {
                 }))}
                 className="w-full"
               />
+              <div className="flex justify-between text-sm text-gray-400">
+                <span>5%</span>
+                <span>50%</span>
+              </div>
             </div>
           </div>
 
@@ -265,6 +278,10 @@ function RiskManagement() {
                 }))}
                 className="w-full"
               />
+              <div className="flex justify-between text-sm text-gray-400">
+                <span>2%</span>
+                <span>30%</span>
+              </div>
             </div>
             
             <div>
@@ -283,6 +300,10 @@ function RiskManagement() {
                 }))}
                 className="w-full"
               />
+              <div className="flex justify-between text-sm text-gray-400">
+                <span>0.5%</span>
+                <span>10%</span>
+              </div>
             </div>
           </div>
         </div>
@@ -302,11 +323,8 @@ function RiskManagement() {
           
           <div className="space-y-4">
             {riskMetrics.recommendations.map((rec, index) => (
-              <motion.div
+              <div
                 key={index}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
                 className={`p-4 rounded-lg border ${
                   rec.priority === 'HIGH' ? 'bg-red-500/10 border-red-500/30' :
                   rec.priority === 'MEDIUM' ? 'bg-yellow-500/10 border-yellow-500/30' :
@@ -330,7 +348,7 @@ function RiskManagement() {
                   </span>
                 </div>
                 <p className="text-gray-300 text-sm">{rec.action}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>

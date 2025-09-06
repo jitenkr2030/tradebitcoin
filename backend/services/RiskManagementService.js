@@ -27,7 +27,6 @@ class RiskManagementService {
 
       // Calculate trading metrics
       const winningTrades = trades.filter(t => parseFloat(t.profit_loss || 0) > 0);
-      const losingTrades = trades.filter(t => parseFloat(t.profit_loss || 0) < 0);
       const winRate = trades.length > 0 ? (winningTrades.length / trades.length) * 100 : 0;
 
       // Calculate drawdown
@@ -76,39 +75,6 @@ class RiskManagementService {
     }
   }
 
-  async calculatePortfolioRisk(userId) {
-    try {
-      const portfolio = await db.prepare('SELECT * FROM portfolio WHERE user_id = ?').all(userId);
-      
-      if (portfolio.length === 0) {
-        return { riskScore: 0, metrics: {}, recommendations: [] };
-      }
-
-      const totalValue = portfolio.reduce((sum, asset) => sum + parseFloat(asset.total_value), 0);
-      
-      // Calculate correlation matrix
-      const correlationMatrix = await this.calculateCorrelationMatrix(portfolio);
-      
-      // Calculate portfolio beta
-      const portfolioBeta = await this.calculatePortfolioBeta(portfolio);
-      
-      // Calculate diversification ratio
-      const diversificationRatio = this.calculateDiversificationRatio(portfolio, correlationMatrix);
-
-      return {
-        totalValue,
-        portfolioBeta,
-        diversificationRatio,
-        correlationMatrix,
-        concentrationRisk: this.calculateConcentration(portfolio),
-        recommendations: this.generatePortfolioRiskRecommendations(portfolio)
-      };
-    } catch (error) {
-      logger.error('Calculate portfolio risk error:', error);
-      throw error;
-    }
-  }
-
   calculateDailyReturns(trades) {
     const dailyPnL = {};
     
@@ -129,7 +95,7 @@ class RiskManagementService {
     returns.forEach(ret => {
       cumulative += ret;
       if (cumulative > peak) peak = cumulative;
-      const drawdown = (peak - cumulative) / peak;
+      const drawdown = peak > 0 ? (peak - cumulative) / peak : 0;
       if (drawdown > maxDrawdown) maxDrawdown = drawdown;
     });
 
@@ -159,7 +125,7 @@ class RiskManagementService {
     
     const mean = returns.reduce((sum, ret) => sum + ret, 0) / returns.length;
     const variance = returns.reduce((sum, ret) => sum + Math.pow(ret - mean, 2), 0) / returns.length;
-    return Math.sqrt(variance) * Math.sqrt(252); // Annualized
+    return Math.sqrt(variance) * Math.sqrt(252);
   }
 
   calculateConcentration(portfolio) {
@@ -168,27 +134,22 @@ class RiskManagementService {
     const totalValue = portfolio.reduce((sum, asset) => sum + parseFloat(asset.total_value), 0);
     const weights = portfolio.map(asset => parseFloat(asset.total_value) / totalValue);
     
-    // Herfindahl-Hirschman Index
     return weights.reduce((sum, weight) => sum + Math.pow(weight, 2), 0);
   }
 
   calculateRiskScore(metrics) {
-    let score = 50; // Base score
+    let score = 50;
     
-    // Adjust based on drawdown
     if (metrics.maxDrawdown > 20) score += 20;
     else if (metrics.maxDrawdown > 10) score += 10;
     else if (metrics.maxDrawdown < 5) score -= 10;
     
-    // Adjust based on win rate
     if (metrics.winRate > 70) score -= 15;
     else if (metrics.winRate < 40) score += 15;
     
-    // Adjust based on Sharpe ratio
     if (metrics.sharpeRatio > 2) score -= 20;
     else if (metrics.sharpeRatio < 0.5) score += 20;
     
-    // Adjust based on concentration
     if (metrics.portfolioConcentration > 0.5) score += 15;
     else if (metrics.portfolioConcentration < 0.2) score -= 10;
     
@@ -232,61 +193,6 @@ class RiskManagementService {
     }
     
     return recommendations;
-  }
-
-  generatePortfolioRiskRecommendations(portfolio) {
-    const recommendations = [];
-    const totalValue = portfolio.reduce((sum, asset) => sum + parseFloat(asset.total_value), 0);
-    
-    // Check for over-concentration
-    portfolio.forEach(asset => {
-      const allocation = parseFloat(asset.total_value) / totalValue;
-      if (allocation > 0.4) {
-        recommendations.push({
-          type: 'REDUCE_CONCENTRATION',
-          priority: 'HIGH',
-          message: `${asset.symbol} represents ${(allocation * 100).toFixed(1)}% of portfolio`,
-          action: `Consider reducing ${asset.symbol} allocation below 30%`
-        });
-      }
-    });
-    
-    return recommendations;
-  }
-
-  async calculateCorrelationMatrix(portfolio) {
-    // Simplified correlation calculation
-    const correlations = {};
-    
-    for (let i = 0; i < portfolio.length; i++) {
-      for (let j = i + 1; j < portfolio.length; j++) {
-        const asset1 = portfolio[i].symbol;
-        const asset2 = portfolio[j].symbol;
-        
-        // In production, this would use historical price data
-        const correlation = Math.random() * 2 - 1; // -1 to 1
-        correlations[`${asset1}-${asset2}`] = correlation;
-      }
-    }
-    
-    return correlations;
-  }
-
-  async calculatePortfolioBeta(portfolio) {
-    // Simplified beta calculation (vs BTC as market)
-    return portfolio.reduce((sum, asset) => {
-      const weight = parseFloat(asset.allocation_percent || 0) / 100;
-      const assetBeta = asset.symbol === 'BTC' ? 1 : Math.random() * 2; // Simplified
-      return sum + (weight * assetBeta);
-    }, 0);
-  }
-
-  calculateDiversificationRatio(portfolio, correlationMatrix) {
-    // Simplified diversification ratio
-    const weights = portfolio.map(asset => parseFloat(asset.allocation_percent || 0) / 100);
-    const avgCorrelation = Object.values(correlationMatrix).reduce((sum, corr) => sum + Math.abs(corr), 0) / Object.keys(correlationMatrix).length;
-    
-    return 1 - (avgCorrelation || 0);
   }
 }
 

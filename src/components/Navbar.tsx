@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bot, TrendingUp, Briefcase, Brain, Calculator, Coins, BookOpen, Settings, LogOut } from 'lucide-react';
+import { Bot, TrendingUp, Briefcase, Brain, Calculator, Coins, BookOpen, Settings, LogOut, Users, Target, Shield } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 function Navbar() {
@@ -51,6 +51,26 @@ function Navbar() {
           <Link to="/education" className="flex items-center space-x-2 hover:text-blue-400 transition-colors">
             <BookOpen className="w-5 h-5" />
             <span>Education</span>
+          </Link>
+          
+          <Link to="/copy-trading" className="flex items-center space-x-2 hover:text-blue-400 transition-colors">
+            <Users className="w-5 h-5" />
+            <span>Copy Trading</span>
+          </Link>
+          
+          <Link to="/advanced-orders" className="flex items-center space-x-2 hover:text-blue-400 transition-colors">
+            <Target className="w-5 h-5" />
+            <span>Advanced Orders</span>
+          </Link>
+          
+          <Link to="/risk-management" className="flex items-center space-x-2 hover:text-blue-400 transition-colors">
+            <Shield className="w-5 h-5" />
+            <span>Risk Management</span>
+          </Link>
+          
+          <Link to="/enhanced-ai" className="flex items-center space-x-2 hover:text-blue-400 transition-colors">
+            <Brain className="w-5 h-5" />
+            <span>Enhanced AI</span>
           </Link>
           
           <Link to="/settings" className="flex items-center space-x-2 hover:text-blue-400 transition-colors">

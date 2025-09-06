@@ -26,7 +26,10 @@ router.get('/leaderboard', async (req, res) => {
         ct.risk_score,
         ct.verified_trader,
         ct.subscription_fee,
-        ct.performance_fee
+        ct.performance_fee,
+        ct.description,
+        ct.trading_experience,
+        ct.created_at
       FROM copy_traders ct
       JOIN users u ON ct.user_id = u.id
       WHERE ct.is_active = 1 AND ct.accepting_followers = 1
@@ -136,7 +139,8 @@ router.get('/following', async (req, res) => {
         ct.total_profit,
         ct.win_rate,
         ct.sharpe_ratio,
-        ct.max_drawdown
+        ct.max_drawdown,
+        ct.verified_trader
       FROM copy_trading_follows ctf
       JOIN users u ON ctf.trader_id = u.id
       JOIN copy_traders ct ON ctf.trader_id = ct.user_id
@@ -153,38 +157,6 @@ router.get('/following', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch followed traders'
-    });
-  }
-});
-
-// Unfollow trader
-router.delete('/unfollow/:traderId', async (req, res) => {
-  try {
-    const userId = req.user.userId;
-    const { traderId } = req.params;
-
-    await db.prepare(`
-      UPDATE copy_trading_follows 
-      SET is_active = 0, updated_at = CURRENT_TIMESTAMP
-      WHERE follower_id = ? AND trader_id = ?
-    `).run(userId, traderId);
-
-    // Update trader's follower count
-    await db.prepare(`
-      UPDATE copy_traders 
-      SET total_followers = total_followers - 1 
-      WHERE user_id = ?
-    `).run(traderId);
-
-    res.json({
-      success: true,
-      message: 'Successfully unfollowed trader'
-    });
-  } catch (error) {
-    logger.error('Unfollow trader error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to unfollow trader'
     });
   }
 });

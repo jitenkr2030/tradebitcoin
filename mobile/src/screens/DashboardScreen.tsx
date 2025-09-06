@@ -199,6 +199,36 @@ export default function DashboardScreen({ navigation }: any) {
               <Text style={styles.actionText}>Learn</Text>
             </LinearGradient>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => navigation.navigate('CopyTrading')}
+          >
+            <LinearGradient colors={['#8B5CF6', '#7C3AED']} style={styles.actionGradient}>
+              <Ionicons name="people" size={30} color="#FFFFFF" />
+              <Text style={styles.actionText}>Copy Trading</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => navigation.navigate('AdvancedOrders')}
+          >
+            <LinearGradient colors={['#06B6D4', '#0891B2']} style={styles.actionGradient}>
+              <Ionicons name="options" size={30} color="#FFFFFF" />
+              <Text style={styles.actionText}>Advanced Orders</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => navigation.navigate('RiskManagement')}
+          >
+            <LinearGradient colors={['#F59E0B', '#D97706']} style={styles.actionGradient}>
+              <Ionicons name="shield-checkmark" size={30} color="#FFFFFF" />
+              <Text style={styles.actionText}>Risk Management</Text>
+            </LinearGradient>
+          </TouchableOpacity>
         </View>
       </Animated.View>
     </ScrollView>

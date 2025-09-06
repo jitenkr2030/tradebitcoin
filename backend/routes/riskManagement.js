@@ -73,26 +73,6 @@ router.post('/limits', [
   }
 });
 
-// Get portfolio risk metrics
-router.get('/portfolio-risk', async (req, res) => {
-  try {
-    const userId = req.user.userId;
-    
-    const riskMetrics = await riskService.calculatePortfolioRisk(userId);
-
-    res.json({
-      success: true,
-      data: riskMetrics
-    });
-  } catch (error) {
-    logger.error('Portfolio risk error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to calculate portfolio risk'
-    });
-  }
-});
-
 // Emergency stop all trading
 router.post('/emergency-stop', async (req, res) => {
   try {
@@ -111,13 +91,6 @@ router.post('/emergency-stop', async (req, res) => {
       SET status = 'CANCELLED', updated_at = CURRENT_TIMESTAMP
       WHERE user_id = ? AND status IN ('PENDING', 'PARTIALLY_FILLED')
     `).run(userId);
-
-    // Log emergency stop
-    await db.prepare(`
-      INSERT INTO risk_events (
-        id, user_id, type, description, severity, created_at
-      ) VALUES (?, ?, 'EMERGENCY_STOP', 'User triggered emergency stop', 'HIGH', CURRENT_TIMESTAMP)
-    `).run(generateUUID(), userId);
 
     logger.warn(`Emergency stop triggered by user ${userId}`);
 

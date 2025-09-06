@@ -22,6 +22,9 @@ const aiRoutes = require('./routes/ai');
 const taxRoutes = require('./routes/tax');
 const defiRoutes = require('./routes/defi');
 const educationRoutes = require('./routes/education');
+const copyTradingRoutes = require('./routes/copyTrading');
+const advancedOrdersRoutes = require('./routes/advancedOrders');
+const riskManagementRoutes = require('./routes/riskManagement');
 
 const app = express();
 const server = createServer(app);
@@ -86,6 +89,9 @@ app.use('/api/v1/ai', authMiddleware, aiRoutes);
 app.use('/api/v1/tax', authMiddleware, taxRoutes);
 app.use('/api/v1/defi', authMiddleware, defiRoutes);
 app.use('/api/v1/education', authMiddleware, educationRoutes);
+app.use('/api/v1/copy-trading', authMiddleware, copyTradingRoutes);
+app.use('/api/v1/advanced-orders', authMiddleware, advancedOrdersRoutes);
+app.use('/api/v1/risk-management', authMiddleware, riskManagementRoutes);
 
 // WebSocket setup for real-time updates
 const wss = new WebSocketServer({ 

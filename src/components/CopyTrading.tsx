@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Star, TrendingUp, Shield, Award, Copy } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Users, Star, TrendingUp, Shield, Award, Copy, UserCheck } from 'lucide-react';
 
 interface Trader {
   id: string;
@@ -13,7 +12,8 @@ interface Trader {
   verifiedTrader: boolean;
   subscriptionFee: number;
   performanceFee: number;
-  avatar?: string;
+  description: string;
+  tradingExperience: number;
 }
 
 function CopyTrading() {
@@ -89,21 +89,61 @@ function CopyTrading() {
     return 'text-red-400';
   };
 
+  const getPerformanceColor = (profit: number) => {
+    if (profit >= 20) return 'text-green-400';
+    if (profit >= 10) return 'text-blue-400';
+    if (profit >= 0) return 'text-yellow-400';
+    return 'text-red-400';
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center space-x-2 mb-8">
         <Users className="w-8 h-8 text-blue-400" />
         <h1 className="text-3xl font-bold">Copy Trading</h1>
+        <div className="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full text-sm">
+          Follow Expert Traders
+        </div>
+      </div>
+
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="bg-gray-800 rounded-lg p-6">
+          <div className="flex items-center space-x-2 mb-2">
+            <Users className="w-5 h-5 text-blue-400" />
+            <span className="text-gray-400">Following</span>
+          </div>
+          <div className="text-2xl font-bold">{following.length}</div>
+        </div>
+        <div className="bg-gray-800 rounded-lg p-6">
+          <div className="flex items-center space-x-2 mb-2">
+            <TrendingUp className="w-5 h-5 text-green-400" />
+            <span className="text-gray-400">Avg Performance</span>
+          </div>
+          <div className="text-2xl font-bold text-green-400">+12.5%</div>
+        </div>
+        <div className="bg-gray-800 rounded-lg p-6">
+          <div className="flex items-center space-x-2 mb-2">
+            <Shield className="w-5 h-5 text-yellow-400" />
+            <span className="text-gray-400">Risk Score</span>
+          </div>
+          <div className="text-2xl font-bold text-yellow-400">Medium</div>
+        </div>
+        <div className="bg-gray-800 rounded-lg p-6">
+          <div className="flex items-center space-x-2 mb-2">
+            <Award className="w-5 h-5 text-purple-400" />
+            <span className="text-gray-400">Top Traders</span>
+          </div>
+          <div className="text-2xl font-bold">{traders.length}</div>
+        </div>
       </div>
 
       {/* Top Traders Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {traders.map((trader) => (
-          <motion.div
+          <div
             key={trader.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-blue-500/50 transition-all cursor-pointer"
+            className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-blue-500/50 transition-all cursor-pointer transform hover:scale-105"
             onClick={() => setSelectedTrader(trader)}
           >
             <div className="flex items-center justify-between mb-4">
@@ -124,8 +164,9 @@ function CopyTrading() {
                 </div>
               </div>
               {following.includes(trader.id) && (
-                <div className="bg-green-500/20 text-green-400 px-2 py-1 rounded text-xs">
-                  Following
+                <div className="bg-green-500/20 text-green-400 px-2 py-1 rounded text-xs flex items-center space-x-1">
+                  <UserCheck className="w-3 h-3" />
+                  <span>Following</span>
                 </div>
               )}
             </div>
@@ -133,7 +174,9 @@ function CopyTrading() {
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
                 <p className="text-gray-400 text-sm">Total Profit</p>
-                <p className="text-green-400 font-bold">+{trader.totalProfit.toFixed(2)}%</p>
+                <p className={`font-bold ${getPerformanceColor(trader.totalProfit)}`}>
+                  +{trader.totalProfit.toFixed(2)}%
+                </p>
               </div>
               <div>
                 <p className="text-gray-400 text-sm">Win Rate</p>
@@ -151,6 +194,11 @@ function CopyTrading() {
               </div>
             </div>
 
+            <div className="mb-4">
+              <p className="text-gray-400 text-sm mb-2">Experience</p>
+              <p className="text-sm text-gray-300">{trader.description}</p>
+            </div>
+
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-400">
                 Fee: {trader.subscriptionFee}% + {trader.performanceFee}% profit
@@ -166,18 +214,14 @@ function CopyTrading() {
                 ))}
               </div>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
 
       {/* Follow Trader Modal */}
       {selectedTrader && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4"
-          >
+          <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold">Follow {selectedTrader.name}</h2>
               <button
@@ -252,7 +296,7 @@ function CopyTrading() {
                 <span>{loading ? 'Following...' : 'Start Copying'}</span>
               </button>
             </div>
-          </motion.div>
+          </div>
         </div>
       )}
     </div>

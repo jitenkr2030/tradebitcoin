@@ -15,6 +15,9 @@ import TaxAssistantScreen from '../screens/TaxAssistantScreen';
 import DeFiScreen from '../screens/DeFiScreen';
 import EducationScreen from '../screens/EducationScreen';
 import BacktestingScreen from '../screens/BacktestingScreen';
+import CopyTradingScreen from '../screens/CopyTradingScreen';
+import AdvancedOrdersScreen from '../screens/AdvancedOrdersScreen';
+import RiskManagementScreen from '../screens/RiskManagementScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -119,6 +122,36 @@ export default function Navigation() {
               options={{
                 headerShown: true,
                 title: 'Backtesting',
+                headerStyle: { backgroundColor: '#1F2937' },
+                headerTintColor: '#FFFFFF',
+              }}
+            />
+            <Stack.Screen 
+              name="CopyTrading" 
+              component={CopyTradingScreen}
+              options={{
+                headerShown: true,
+                title: 'Copy Trading',
+                headerStyle: { backgroundColor: '#1F2937' },
+                headerTintColor: '#FFFFFF',
+              }}
+            />
+            <Stack.Screen 
+              name="AdvancedOrders" 
+              component={AdvancedOrdersScreen}
+              options={{
+                headerShown: true,
+                title: 'Advanced Orders',
+                headerStyle: { backgroundColor: '#1F2937' },
+                headerTintColor: '#FFFFFF',
+              }}
+            />
+            <Stack.Screen 
+              name="RiskManagement" 
+              component={RiskManagementScreen}
+              options={{
+                headerShown: true,
+                title: 'Risk Management',
                 headerStyle: { backgroundColor: '#1F2937' },
                 headerTintColor: '#FFFFFF',
               }}
