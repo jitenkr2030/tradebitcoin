@@ -18,6 +18,8 @@ import BacktestingScreen from '../screens/BacktestingScreen';
 import CopyTradingScreen from '../screens/CopyTradingScreen';
 import AdvancedOrdersScreen from '../screens/AdvancedOrdersScreen';
 import RiskManagementScreen from '../screens/RiskManagementScreen';
+import ARTradingScreen from '../screens/ARTradingScreen';
+import SocialTradingScreen from '../screens/SocialTradingScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -152,6 +154,26 @@ export default function Navigation() {
               options={{
                 headerShown: true,
                 title: 'Risk Management',
+                headerStyle: { backgroundColor: '#1F2937' },
+                headerTintColor: '#FFFFFF',
+              }}
+            />
+            <Stack.Screen 
+              name="ARTrading" 
+              component={ARTradingScreen}
+              options={{
+                headerShown: true,
+                title: 'AR Trading',
+                headerStyle: { backgroundColor: '#1F2937' },
+                headerTintColor: '#FFFFFF',
+              }}
+            />
+            <Stack.Screen 
+              name="SocialTrading" 
+              component={SocialTradingScreen}
+              options={{
+                headerShown: true,
+                title: 'Social Trading',
                 headerStyle: { backgroundColor: '#1F2937' },
                 headerTintColor: '#FFFFFF',
               }}

@@ -19,6 +19,12 @@ import CopyTrading from './components/CopyTrading';
 import AdvancedOrders from './components/AdvancedOrders';
 import RiskManagement from './components/RiskManagement';
 import EnhancedAI from './components/EnhancedAI';
+import ARTradingView from './components/ARTradingView';
+import SocialTradingPlatform from './components/SocialTradingPlatform';
+import AIMarketplace from './components/AIMarketplace';
+import BankingIntegration from './components/BankingIntegration';
+import GlobalExpansion from './components/GlobalExpansion';
+import MarketingAutomation from './components/MarketingAutomation';
 import PrivateRoute from './components/PrivateRoute';
 
 function App() {
@@ -95,6 +101,42 @@ function App() {
                 <div className="min-h-screen bg-gray-900 text-white">
                   <Navbar />
                   <PrivateRoute><EnhancedAI /></PrivateRoute>
+                </div>
+              } />
+              <Route path="/ar-trading" element={
+                <div className="min-h-screen bg-gray-900 text-white">
+                  <Navbar />
+                  <PrivateRoute><ARTradingView /></PrivateRoute>
+                </div>
+              } />
+              <Route path="/social-trading" element={
+                <div className="min-h-screen bg-gray-900 text-white">
+                  <Navbar />
+                  <PrivateRoute><SocialTradingPlatform /></PrivateRoute>
+                </div>
+              } />
+              <Route path="/ai-marketplace" element={
+                <div className="min-h-screen bg-gray-900 text-white">
+                  <Navbar />
+                  <PrivateRoute><AIMarketplace /></PrivateRoute>
+                </div>
+              } />
+              <Route path="/banking" element={
+                <div className="min-h-screen bg-gray-900 text-white">
+                  <Navbar />
+                  <PrivateRoute><BankingIntegration /></PrivateRoute>
+                </div>
+              } />
+              <Route path="/global-expansion" element={
+                <div className="min-h-screen bg-gray-900 text-white">
+                  <Navbar />
+                  <PrivateRoute><GlobalExpansion /></PrivateRoute>
+                </div>
+              } />
+              <Route path="/marketing" element={
+                <div className="min-h-screen bg-gray-900 text-white">
+                  <Navbar />
+                  <PrivateRoute><MarketingAutomation /></PrivateRoute>
                 </div>
               } />
               <Route path="/settings" element={

@@ -213,6 +213,104 @@ const initializeDatabase = () => {
       )
     `);
 
+    // Banking tables
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS bank_accounts (
+        id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+        account_number TEXT NOT NULL,
+        ifsc_code TEXT NOT NULL,
+        account_holder_name TEXT NOT NULL,
+        bank_name TEXT NOT NULL,
+        account_type TEXT DEFAULT 'SAVINGS',
+        verification_status TEXT DEFAULT 'PENDING',
+        verification_data TEXT DEFAULT '{}',
+        is_primary BOOLEAN DEFAULT FALSE,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS banking_transactions (
+        id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+        bank_account_id TEXT REFERENCES bank_accounts(id),
+        type TEXT NOT NULL,
+        amount REAL NOT NULL,
+        currency TEXT DEFAULT 'INR',
+        status TEXT DEFAULT 'PENDING',
+        upi_id TEXT,
+        qr_code TEXT,
+        upi_transaction_id TEXT,
+        processing_fee REAL DEFAULT 0,
+        expires_at DATETIME,
+        completed_at DATETIME,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Marketing tables
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS marketing_campaigns (
+        id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+        name TEXT NOT NULL,
+        type TEXT NOT NULL,
+        audience TEXT NOT NULL,
+        content TEXT NOT NULL,
+        status TEXT DEFAULT 'DRAFT',
+        sent_count INTEGER DEFAULT 0,
+        opened_count INTEGER DEFAULT 0,
+        clicked_count INTEGER DEFAULT 0,
+        converted_count INTEGER DEFAULT 0,
+        revenue REAL DEFAULT 0,
+        started_at DATETIME,
+        ended_at DATETIME,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS marketing_messages (
+        id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+        campaign_id TEXT REFERENCES marketing_campaigns(id) ON DELETE CASCADE,
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+        type TEXT NOT NULL,
+        status TEXT DEFAULT 'PENDING',
+        opened_at DATETIME,
+        clicked_at DATETIME,
+        sent_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Social trading tables
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS social_posts (
+        id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+        user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+        content TEXT NOT NULL,
+        trade_data TEXT,
+        likes_count INTEGER DEFAULT 0,
+        comments_count INTEGER DEFAULT 0,
+        shares_count INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS trading_competitions (
+        id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+        name TEXT NOT NULL,
+        description TEXT,
+        start_date DATETIME NOT NULL,
+        end_date DATETIME NOT NULL,
+        prize_pool REAL NOT NULL,
+        participants_count INTEGER DEFAULT 0,
+        status TEXT DEFAULT 'UPCOMING',
+        rules TEXT DEFAULT '{}',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
     logger.info('Database initialized successfully');
   } catch (error) {
     logger.error('Database initialization error:', error);

@@ -229,6 +229,26 @@ export default function DashboardScreen({ navigation }: any) {
               <Text style={styles.actionText}>Risk Management</Text>
             </LinearGradient>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => navigation.navigate('ARTrading')}
+          >
+            <LinearGradient colors={['#8B5CF6', '#7C3AED']} style={styles.actionGradient}>
+              <Ionicons name="cube" size={30} color="#FFFFFF" />
+              <Text style={styles.actionText}>AR Trading</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => navigation.navigate('SocialTrading')}
+          >
+            <LinearGradient colors={['#10B981', '#059669']} style={styles.actionGradient}>
+              <Ionicons name="people" size={30} color="#FFFFFF" />
+              <Text style={styles.actionText}>Social Trading</Text>
+            </LinearGradient>
+          </TouchableOpacity>
         </View>
       </Animated.View>
     </ScrollView>

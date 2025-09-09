@@ -25,6 +25,9 @@ const educationRoutes = require('./routes/education');
 const copyTradingRoutes = require('./routes/copyTrading');
 const advancedOrdersRoutes = require('./routes/advancedOrders');
 const riskManagementRoutes = require('./routes/riskManagement');
+const bankingRoutes = require('./routes/banking');
+const exchangeRoutes = require('./routes/exchanges');
+const marketingRoutes = require('./routes/marketing');
 
 const app = express();
 const server = createServer(app);
@@ -92,6 +95,9 @@ app.use('/api/v1/education', authMiddleware, educationRoutes);
 app.use('/api/v1/copy-trading', authMiddleware, copyTradingRoutes);
 app.use('/api/v1/advanced-orders', authMiddleware, advancedOrdersRoutes);
 app.use('/api/v1/risk-management', authMiddleware, riskManagementRoutes);
+app.use('/api/v1/banking', authMiddleware, bankingRoutes);
+app.use('/api/v1/exchanges', exchangeRoutes);
+app.use('/api/v1/marketing', authMiddleware, marketingRoutes);
 
 // WebSocket setup for real-time updates
 const wss = new WebSocketServer({ 
