@@ -14,7 +14,7 @@
     "install:all": "npm install && cd backend && npm install && cd ../mobile && npm install"
   },
   "dependencies": {
-    "@better-sqlite3/better-sqlite3": "9.4.3",
+    "better-sqlite3": "9.4.3",
     "@react-three/drei": "^9.88.0",
     "@react-three/fiber": "^8.15.0",
     "@reduxjs/toolkit": "^2.2.1",
